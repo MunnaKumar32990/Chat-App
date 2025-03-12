@@ -34,7 +34,7 @@ return (
           groupChat={groupChat}
           members={members}
           sameSender={chatId === _id}
-          handleDeleteChatOpen={handleDeleteChat}
+          handleDeleteChat={handleDeleteChat}
           />
       })
   }

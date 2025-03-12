@@ -6,5 +6,15 @@ name: "John Doe",
 _id: "1",
 groupChat: false,
 members:["1","2"],
-sameSender: false,
-}]
+},
+{
+avatar: ["https://www.w3schools.com/howto/img_avatar.png"
+
+],
+name: " Doe",
+_id: "2",
+groupChat: true,
+members:["1","2"],
+
+}
+]
