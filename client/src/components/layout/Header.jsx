@@ -41,7 +41,9 @@ const Header = () => {
   return (
     <>
       <Box sx={{ flexGrow: 1 }} height={"4rem"}>
-        <AppBar position="static" sx={{ bgcolor: orange[300] }}>
+        <AppBar
+         position="static" 
+         sx={{ bgcolor: orange[300] }}>
           <Toolbar>
             <Typography variant="h6" sx={{ display: { xs: "none", sm: "block" } }}>
               Chat App
