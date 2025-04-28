@@ -49,13 +49,8 @@ cd real-time-chat-app
 
 2. Install dependencies for both client and server
 ```
-# Install server dependencies
-cd server
-npm install
-
-# Install client dependencies
-cd ../client
-npm install
+# Install all dependencies
+npm run install-all
 ```
 
 3. Set up environment variables
@@ -65,6 +60,7 @@ Create a `.env` file in the server directory with the following variables:
 PORT=5002
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
+NODE_ENV=development
 ```
 
 4. Start the application
@@ -74,16 +70,57 @@ JWT_SECRET=your_jwt_secret
 start.bat
 ```
 
-#### Manually:
+#### Manually for development:
 ```
-# Start the server (from server directory)
-npm start
-
-# Start the client (from client directory)
+# Start both client and server in development mode
 npm run dev
+
+# Or start them separately
+npm run server
+npm run client
 ```
 
 The server will run on http://localhost:5002 and the client on http://localhost:5173.
+
+## Deployment to Render
+
+The application is configured for easy deployment to Render.com.
+
+### Option 1: Using render.yaml (Recommended)
+
+1. Push your code to a Git repository (GitHub, GitLab, etc.)
+2. In Render dashboard, go to "Blueprints" and click "New Blueprint Instance"
+3. Connect your repository and select it
+4. Render will automatically detect the render.yaml file and set up the services
+5. Configure environment variables for:
+   - `JWT_SECRET` - A secure random string for JWT authentication
+   - `MONGODB_URI` - Your MongoDB connection string
+
+### Option 2: Manual Setup
+
+#### Backend Setup
+1. Create a new Web Service in Render
+2. Connect your repository
+3. Configure the service:
+   - Name: chat-app-backend
+   - Environment: Node
+   - Build Command: `cd server && npm install`
+   - Start Command: `cd server && npm start`
+   - Add environment variables:
+     - `NODE_ENV=production`
+     - `JWT_SECRET=your_jwt_secret`
+     - `MONGODB_URI=your_mongodb_connection_string`
+     - `PORT=5002`
+
+#### Frontend Setup (Optional - only if deploying separately)
+1. Create a new Static Site in Render
+2. Connect your repository
+3. Configure the service:
+   - Name: chat-app-frontend
+   - Build Command: `cd client && npm install && npm run build`
+   - Publish Directory: `client/dist`
+   - Add environment variables:
+     - `NODE_ENV=production`
 
 ## Project Structure
 
@@ -108,7 +145,9 @@ The server will run on http://localhost:5002 and the client on http://localhost:
 │   ├── uploads/            # Uploaded files
 │   └── utils/              # Utility functions
 │
-└── start.bat              # Script to start both client and server
+├── render.yaml             # Render deployment configuration
+├── package.json            # Root package.json
+└── start.bat               # Script to start both client and server locally
 ```
 
 ## API Endpoints

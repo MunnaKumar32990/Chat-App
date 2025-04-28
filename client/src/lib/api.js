@@ -1,7 +1,7 @@
 import { api } from '../store/authStore';
 
 const API_URL = '/api';
-const IS_DEV = true; // Set to true for development mode
+const IS_DEV = process.env.NODE_ENV !== 'production'; // Set to false for production mode
 
 // Create an axios instance with credentials
 const apiInstance = api;

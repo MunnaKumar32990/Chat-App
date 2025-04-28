@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const helmet = require('helmet');
+const compression = require('compression');
 
 // Routes
 const userRoutes = require('./routes/userRoutes');
@@ -25,13 +27,41 @@ const PORT = process.env.PORT || 5002;
 const app = express();
 const httpServer = createServer(app);
 
+// Security middleware
+if (process.env.NODE_ENV === 'production') {
+  // Use Helmet in production to set security headers
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'", "wss:", "ws:"] // Allow WebSocket connections
+      }
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow loading resources from different origins
+    crossOriginEmbedderPolicy: false // Allow embedding cross-origin resources
+  }));
+  
+  // Use compression in production to compress responses
+  app.use(compression());
+}
+
 // Middleware - order matters!
 app.use(cookieParser());
 app.use(express.json());
+
+// Handle CORS based on environment
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? ['https://chat-app-frontend.onrender.com', 'https://chat-app.onrender.com'] 
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: allowedOrigins,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -55,7 +85,7 @@ app.use((req, res, next) => {
     const defaultOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       path: '/',
       maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     };
@@ -74,7 +104,7 @@ app.use((req, res, next) => {
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST']
   }
@@ -84,6 +114,15 @@ const io = new Server(httpServer, {
 app.use('/api/users', userRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', messageRoutes);
+
+// Health check endpoint for Render
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Debugging route to see all registered routes
 app.get('/debug/routes', (req, res) => {
@@ -118,10 +157,22 @@ app.get('/debug/routes', (req, res) => {
   });
 });
 
-// Base route
-app.get('/', (req, res) => {
-  res.send('Chat App API is running');
-});
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  const clientBuildPath = path.join(__dirname, '../client/dist');
+  app.use(express.static(clientBuildPath));
+
+  // Serve the HTML file for any request that doesn't match an API route
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(clientBuildPath, 'index.html'));
+  });
+} else {
+  // Base route for development
+  app.get('/', (req, res) => {
+    res.send('Chat App API is running');
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {

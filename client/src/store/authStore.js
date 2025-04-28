@@ -3,13 +3,19 @@ import axios from 'axios';
 import { persist } from 'zustand/middleware';
 import { disconnectSocket } from '../services/socket';
 
+// Configure baseURL based on environment
+const baseURL = '/api'; // Always use relative path for API requests
+console.log('Environment:', process.env.NODE_ENV);
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
   withCredentials: true
 });
 
 // Add console log for debugging
-console.log('Auth API baseURL configured as:', '/api');
+console.log('Auth API baseURL configured as:', baseURL);
+
+export { api }; // Export api for use in other modules
 
 export const useAuthStore = create(
   persist(
@@ -210,6 +216,4 @@ api.interceptors.response.use(
     }
     return Promise.reject(error);
   }
-);
-
-export { api }; 
+); 

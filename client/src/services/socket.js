@@ -4,59 +4,73 @@ import { useChatStore } from '../store/chatStore';
 
 let socket;
 
-export const connectSocket = () => {
-  const user = useAuthStore.getState().user;
-  
-  if (user && !socket) {
-    socket = io('http://localhost:5002', {
-      withCredentials: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      timeout: 10000
-    });
-
-    socket.emit('setup', user);
-
-    socket.on('connect', () => {
-      console.log('Socket connected');
-      // Update user's online status
-      socket.emit('user_online', user._id);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-    
-    // Set up socket error handling
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-    });
-    
-    socket.on('reconnect', (attemptNumber) => {
-      console.log(`Socket reconnected after ${attemptNumber} attempts`);
-      // Re-setup user after reconnection
-      if (user) {
-        socket.emit('setup', user);
-        socket.emit('user_online', user._id);
-      }
-    });
+// Get base URL based on environment
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    // In production, the socket connection should be to the same origin
+    return window.location.origin;
   }
+  // In development, connect to the development server
+  return 'http://localhost:5002';
+};
+
+export const connectSocket = (token) => {
+  if (socket && socket.connected) return socket;
+  
+  const baseUrl = getBaseUrl();
+  console.log(`Connecting to socket at ${baseUrl}`);
+  
+  const socketOptions = {
+    withCredentials: true,
+    auth: {
+      token
+    },
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    transports: ['websocket', 'polling'] // Try WebSocket first, then fall back to polling
+  };
+  
+  socket = io(baseUrl, socketOptions);
+  
+  socket.on('connect', () => {
+    console.log('Socket connected:', socket.id);
+  });
+  
+  socket.on('connect_error', (error) => {
+    console.error('Socket connection error:', error.message);
+  });
+  
+  socket.on('disconnect', (reason) => {
+    console.log('Socket disconnected:', reason);
+  });
   
   return socket;
 };
 
+export const getSocket = () => socket;
+
 export const disconnectSocket = () => {
   if (socket) {
-    // Notify server that user is going offline
-    const user = useAuthStore.getState().user;
-    if (user) {
-      socket.emit('user_offline', user._id);
-    }
-    
+    console.log('Disconnecting socket...');
     socket.disconnect();
     socket = null;
   }
+};
+
+export const emitEvent = (event, data) => {
+  if (socket && socket.connected) {
+    socket.emit(event, data);
+  } else {
+    console.warn('Socket not connected. Event not emitted:', event);
+  }
+};
+
+export const subscribeToEvent = (event, callback) => {
+  if (socket) {
+    socket.on(event, callback);
+    return () => socket.off(event, callback);
+  }
+  return () => {};
 };
 
 export const joinChat = (chatId) => {
@@ -146,5 +160,17 @@ export const removeMessageListeners = () => {
   }
 };
 
-// Get the socket instance
-export const getSocket = () => socket; 
+export default {
+  connectSocket,
+  getSocket,
+  disconnectSocket,
+  emitEvent,
+  subscribeToEvent,
+  joinChat,
+  leaveChat,
+  sendMessage,
+  emitTyping,
+  emitStopTyping,
+  setupMessageListeners,
+  removeMessageListeners
+}; 
