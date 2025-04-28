@@ -5,6 +5,7 @@ import ModernHeader from './ModernHeader';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import InstallPrompt from '../shared/InstallPrompt';
 
 const ModernLayout = ({ fullWidth = false }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -95,6 +96,9 @@ const ModernLayout = ({ fullWidth = false }) => {
             <Outlet />
           </main>
         </div>
+        
+        {/* Install Prompt */}
+        <InstallPrompt />
       </div>
     </div>
   );

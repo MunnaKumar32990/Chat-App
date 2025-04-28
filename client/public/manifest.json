@@ -1,0 +1,17 @@
+{
+  "name": "Chat App",
+  "short_name": "ChatApp",
+  "description": "Real-time chat application with MERN stack",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/chat-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+} 

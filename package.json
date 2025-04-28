@@ -10,7 +10,8 @@
     "client": "cd client && npm run dev",
     "install-all": "npm install && cd client && npm install --production=false && cd ../server && npm install",
     "build": "npm install && cd client && npm install --production=false && npm run build && cd ../server && npm install",
-    "deploy": "npm run build && cd server && npm start"
+    "deploy": "npm run build && cd server && npm start",
+    "build-pwa": "cd client && npm install workbox-window workbox-webpack-plugin --production=false && npm run build"
   },
   "keywords": [
     "chat",
@@ -27,5 +28,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "workbox-window": "^7.3.0"
   }
-} 
+}
