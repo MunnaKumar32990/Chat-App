@@ -4,12 +4,12 @@
   "description": "Real-time chat application with React, Express, MongoDB and Socket.io",
   "main": "index.js",
   "scripts": {
-    "start": "cd server && npm start",
+    "start": "cd server && npm install && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev",
     "install-all": "npm install && cd client && npm install --production=false && cd ../server && npm install",
-    "build": "cd client && npm install --production=false && npm run build",
+    "build": "npm install && cd client && npm install --production=false && npm run build && cd ../server && npm install",
     "deploy": "npm run build && cd server && npm start"
   },
   "keywords": [
