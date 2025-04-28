@@ -17,10 +17,10 @@ const Profile = () => {
       border:"5px solid white",
     }}
 />
-<ProfileCard heading ={"Bio"} text={"helloooooo"}/>
-<ProfileCard heading ={"Username"} text={"Munna@6556"} Icon={<UserNameIcon/>}/>
-<ProfileCard heading ={"Name"} text={"Munna Kumar"} Icon={<FaceIcon/>}/>
-<ProfileCard heading={"Joined"} text={moment('2025-03-13T00:00:00.000Z').fromNow()} Icon={<CalenderIcon />} />
+<ProfileCard heading ={"Bio"} />
+<ProfileCard heading ={"Username"} Icon={<UserNameIcon/>}/>
+<ProfileCard heading ={"Name"}Icon={<FaceIcon/>}/>
+<ProfileCard heading={"Joined"}  Icon={<CalenderIcon />} />
 
    </Stack>
   )

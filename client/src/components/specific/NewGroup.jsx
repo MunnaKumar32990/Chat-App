@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import {Avatar, Button, Dialog, DialogTitle,ListItem,Stack,TextField,Typography,} from "@mui/material"
 import UserItem from '../shared/UserItem'
 import { sampleUsers } from '../../constants/sampleData'
-import { useInputValidation } from '6pp'
+import { useInputValidation } from '../../hooks/useInputValidation'
 
 const NewGroup = () => {
 

@@ -1,12 +1,59 @@
-# React + Vite
+# Modern Chat Application Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend for our real-time chat application, built with modern web technologies and best practices.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Modern UI** with Tailwind CSS and custom design system
+- **Real-time messaging** with socket.io
+- **Authentication** with JWT tokens
+- **Dark mode** support
+- **Responsive design** for all devices
+- **Optimized performance** with code splitting and lazy loading
+- **Enhanced user experience** with modern transitions and animations
 
-## Expanding the ESLint configuration
+## Key Components
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **ModernHeader** - A clean, responsive header with user profile access and notification controls
+- **ModernLayout** - A flexible layout system with support for sidebars and panels
+- **ChatMessage** - Rich message component with support for text, images, files, and interactive elements
+- **ChatInput** - Advanced input component with emoji picker, file attachments, and typing indicators
+
+## Technology Stack
+
+- React 18
+- Tailwind CSS
+- Socket.io for real-time communication
+- React Router for navigation
+- Zustand for state management
+- Emoji Picker for emoji support
+- React Hot Toast for notifications
+- Date-fns for date formatting
+
+## Getting Started
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Start the development server:
+   ```
+   npm run dev
+   ```
+
+3. Build for production:
+   ```
+   npm run build
+   ```
+
+## Project Structure
+
+- `/src/components` - Reusable UI components
+- `/src/pages` - Page components for different routes
+- `/src/context` - React context providers
+- `/src/hooks` - Custom React hooks
+- `/src/lib` - Utility functions and API clients
+- `/src/services` - Service modules for external APIs
+- `/src/store` - State management (Zustand stores)
+- `/src/assets` - Static assets like images and icons

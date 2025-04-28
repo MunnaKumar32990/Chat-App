@@ -1,9 +1,16 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
+import { LayoutLoader } from '../layout/Loader';
 
-const ProtectRoute = ({ children, user, redirect = "/login" }) => {
-  if (!user) return <Navigate to={redirect} />;
-  return children ? <>{children}</> : <Outlet />;
+const ProtectRoute = () => {
+  const { isAuthenticated, loading } = useAuthStore();
+
+  if (loading) {
+    return <LayoutLoader />;
+  }
+
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectRoute;

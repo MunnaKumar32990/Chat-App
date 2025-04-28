@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/chat-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+    <style>
+      :root {
+        --chat-bg-light: #e5ded8;
+        --chat-bg-dark: #0b141a;
+      }
+      
+      .chat-bg-pattern {
+        position: relative;
+      }
+      
+      .chat-bg-pattern::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.06;
+        background-color: #000;
+        background-image: 
+          radial-gradient(#fff 15%, transparent 16%), 
+          radial-gradient(#fff 15%, transparent 16%);
+        background-size: 60px 60px;
+        background-position: 0 0, 30px 30px;
+        z-index: 0;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .chat-bg-pattern::before {
+          opacity: 0.03;
+          background-color: #fff;
+          background-image: 
+            radial-gradient(#000 15%, transparent 16%), 
+            radial-gradient(#000 15%, transparent 16%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html> 
