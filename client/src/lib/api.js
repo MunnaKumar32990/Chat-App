@@ -178,15 +178,13 @@ export const updateProfile = async (userData) => {
   try {
     console.log('Updating profile with data:', userData);
     
-    // If userData is FormData, log the entries
-    if (userData instanceof FormData) {
-      console.log('FormData contents:');
-      for (let [key, value] of userData.entries()) {
-        console.log(`${key}: ${value instanceof File ? `File: ${value.name}` : value}`);
-      }
+    const { data } = await apiInstance.patch('/users/profile', userData);
+    
+    // If we get a new token, update the default authorization header
+    if (data.token) {
+      apiInstance.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
     }
     
-    const { data } = await apiInstance.patch('/users/profile', userData);
     return data;
   } catch (error) {
     console.error('Profile update error:', error);
@@ -390,27 +388,52 @@ export const markMessagesAsRead = async (messageIds) => {
   }
 };
 
-// Add the missing uploadFile function
+// Upload file function with improved error handling
 export const uploadFile = async (file, chatId) => {
   try {
     if (!file || !chatId) {
       throw new Error('File and chat ID are required');
     }
     
+    console.log('Uploading file:', file.name, 'type:', file.type, 'size:', file.size);
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('chatId', chatId);
     
+    // Log details of the file being uploaded
+    console.log('Upload request prepared for:', {
+      filename: file.name,
+      type: file.type,
+      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      chatId
+    });
+    
     const { data } = await apiInstance.post('/messages/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      // Add timeout and retry configuration for large files
+      timeout: 30000, // 30 seconds timeout for uploads
+      maxBodyLength: 25 * 1024 * 1024, // 25MB max body length
+      maxContentLength: 25 * 1024 * 1024 // 25MB max content length
     });
     
+    console.log('File upload successful:', data);
     return data;
   } catch (error) {
     console.error('Error uploading file:', error);
-    throw error;
+    
+    // Create more descriptive error message
+    const errorMessage = error.response?.data?.message || error.message || 'Unknown error during file upload';
+    const errorDetails = {
+      message: errorMessage,
+      status: error.response?.status,
+      file: file ? { name: file.name, type: file.type, size: file.size } : null
+    };
+    
+    console.error('Upload error details:', errorDetails);
+    throw errorDetails;
   }
 };
 

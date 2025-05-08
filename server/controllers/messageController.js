@@ -8,7 +8,7 @@ const multer = require('multer');
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '../uploads');
+    const uploadDir = path.join(__dirname, '../uploads/attachments');
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -16,32 +16,40 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Generate unique filename
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}-${file.originalname}`;
+    // Generate unique filename with safer character replacement
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}-${originalName}`;
     cb(null, uniqueName);
   }
 });
 
 // File filter
 const fileFilter = (req, file, cb) => {
-  // Accept images, documents and text files
+  // Accept images, documents, audio files and text files
   if (
     file.mimetype.startsWith('image/') || 
     file.mimetype === 'application/pdf' ||
     file.mimetype === 'application/msword' ||
     file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-    file.mimetype === 'text/plain'
+    file.mimetype === 'text/plain' ||
+    file.mimetype.startsWith('audio/') ||
+    file.mimetype === 'application/octet-stream' ||
+    file.mimetype === 'audio/mp4' ||
+    file.mimetype === 'audio/mpeg' ||
+    file.mimetype === 'audio/ogg' ||
+    file.mimetype === 'audio/webm' ||
+    file.mimetype === 'audio/wav'
   ) {
     cb(null, true);
   } else {
-    cb(new Error('Unsupported file format'), false);
+    cb(new Error(`Unsupported file format: ${file.mimetype}`), false);
   }
 };
 
 // Initialize upload
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
   fileFilter: fileFilter
 });
 
@@ -190,11 +198,13 @@ const deleteMessage = async (req, res) => {
 // @access  Private
 const uploadFile = async (req, res) => {
   try {
+    console.log('Processing file upload request');
     // Use multer middleware for single file upload
     const uploadMiddleware = upload.single('file');
 
     uploadMiddleware(req, res, async function (err) {
       if (err) {
+        console.error('File upload error:', err);
         return res.status(400).json({
           success: false,
           message: err.message || 'Error uploading file'
@@ -202,6 +212,7 @@ const uploadFile = async (req, res) => {
       }
 
       if (!req.file) {
+        console.error('No file in request');
         return res.status(400).json({
           success: false,
           message: 'No file uploaded'
@@ -211,16 +222,22 @@ const uploadFile = async (req, res) => {
       const { chatId } = req.body;
 
       if (!chatId) {
+        console.error('No chatId in request');
         return res.status(400).json({
           success: false,
           message: 'Chat ID is required'
         });
       }
 
-      // Get file info
-      const fileUrl = `/uploads/${req.file.filename}`;
+      console.log('File uploaded successfully:', req.file);
+
+      // Get file info with proper URL path
+      const protocol = req.protocol;
+      const host = req.get('host');
+      const fileUrl = `${protocol}://${host}/uploads/attachments/${req.file.filename}`;
       const fileType = req.file.mimetype;
       const fileName = req.file.originalname;
+      const fileSize = req.file.size;
 
       // Create message with file attachment
       let newMessage = {
@@ -229,8 +246,11 @@ const uploadFile = async (req, res) => {
         fileUrl,
         fileType,
         fileName,
+        fileSize,
         isFileMessage: true
       };
+
+      console.log('Creating new message with attachment:', newMessage);
 
       let message = await Message.create(newMessage);
 

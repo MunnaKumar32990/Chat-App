@@ -418,7 +418,7 @@ exports.updateUserProfile = async (req, res) => {
     const updateData = {
       name,
       username,
-      bio: bio || ''
+      bio: bio || req.user.bio // Keep existing bio if not provided
     };
     
     // Add avatar if uploaded
@@ -438,10 +438,18 @@ exports.updateUserProfile = async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
     
+    // Generate new token to maintain session
+    const token = jwt.sign(
+      { id: updatedUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      user: updatedUser
+      user: updatedUser,
+      token // Send new token to client
     });
   } catch (error) {
     console.error('Update profile error:', error);

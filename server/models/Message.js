@@ -33,12 +33,23 @@ const messageSchema = new mongoose.Schema({
   fileName: {
     type: String
   },
+  fileSize: {
+    type: Number
+  },
   attachments: [{
     type: String,
     default: []
   }]
 }, {
   timestamps: true
+});
+
+// Validate that either content or file attachment is provided
+messageSchema.pre('save', function(next) {
+  if (!this.content && !this.isFileMessage) {
+    throw new Error('Message must have either content or file attachment');
+  }
+  next();
 });
 
 // Add indexes for better query performance

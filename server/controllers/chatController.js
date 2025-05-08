@@ -64,14 +64,23 @@ const fetchChats = async (req, res) => {
     const chats = await Chat.find({
       users: { $elemMatch: { $eq: req.user._id } }
     })
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password")
+      .populate("users", "username avatar email name")
+      .populate("groupAdmin", "username avatar email name")
       .populate("latestMessage")
       .sort({ updatedAt: -1 });
 
+    // Add member count and format response
+    const formattedChats = chats.map(chat => {
+      const chatObj = chat.toObject();
+      if (chatObj.isGroupChat) {
+        chatObj.memberCount = chatObj.users.length;
+      }
+      return chatObj;
+    });
+
     res.json({
       success: true,
-      chats
+      chats: formattedChats
     });
   } catch (error) {
     console.error('Fetch chats error:', error);
@@ -94,7 +103,7 @@ const createGroupChat = async (req, res) => {
       });
     }
 
-    let users = JSON.parse(req.body.users);
+    let users = req.body.users;
 
     if (users.length < 2) {
       return res.status(400).json({
@@ -113,13 +122,19 @@ const createGroupChat = async (req, res) => {
     });
 
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password");
+      .populate("users", "username avatar email name")
+      .populate("groupAdmin", "username avatar email name");
 
-    res.status(201).json({
+    // Add member count to the response
+    const response = {
       success: true,
-      chat: fullGroupChat
-    });
+      chat: {
+        ...fullGroupChat.toObject(),
+        memberCount: fullGroupChat.users.length
+      }
+    };
+
+    res.status(201).json(response);
   } catch (error) {
     console.error('Create group chat error:', error);
     res.status(500).json({

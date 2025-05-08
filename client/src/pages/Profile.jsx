@@ -83,23 +83,23 @@ const Profile = () => {
       setLoading(true);
       console.log('Submitting profile update...');
       
-      // Log FormData contents for debugging
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value}`);
-      }
-      
       const response = await updateProfile(formData);
       console.log('Profile update response:', response);
 
       if (response && response.success) {
         toast.success('Profile updated successfully');
         
-        // Update auth store with new user data
-        if (response.user) {
+        // Update auth store with new user data and token
+        if (response.user && response.token) {
           console.log('New user data:', response.user);
-          // Use the store's method to update the current user
-          login(response.user);
+          // Update the auth store with new user data and token
+          login({
+            ...response.user,
+            token: response.token
+          });
+          
+          // Update local storage with new token
+          localStorage.setItem('token', response.token);
         }
       } else {
         toast.error((response && response.message) || 'Failed to update profile');

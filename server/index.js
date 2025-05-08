@@ -8,6 +8,7 @@ const { Server } = require('socket.io');
 const path = require('path');
 const helmet = require('helmet');
 const compression = require('compression');
+const fs = require('fs');
 
 // Routes
 const userRoutes = require('./routes/userRoutes');
@@ -16,6 +17,18 @@ const messageRoutes = require('./routes/messageRoutes');
 
 // Load environment variables
 dotenv.config();
+
+// Create upload directories if they don't exist
+const uploadDirs = ['uploads', 'uploads/avatars', 'uploads/attachments', 'uploads/groups'];
+uploadDirs.forEach(dir => {
+  const dirPath = path.join(__dirname, dir);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`Created directory: ${dirPath}`);
+  } else {
+    console.log(`Directory already exists: ${dirPath}`);
+  }
+});
 
 // Define JWT Secret (fallback if not in env)
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key';
@@ -65,10 +78,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Serve static files from uploads directory
+// Serve static files from uploads directory with improved configuration
+app.use('/uploads', (req, res, next) => {
+  console.log(`Static file request: ${req.url}`);
+  next();
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Fallback for file not found
 app.use('/uploads', (req, res) => {
-  // This handler will execute if the file is not found
+  console.log(`File not found: ${req.url}`);
   res.status(404).json({
     success: false,
     message: 'File not found'
