@@ -1,17 +1,23 @@
 {
-  "name": "chat-app",
+  "name": "chat-application",
   "version": "1.0.0",
-  "description": "Real-time chat application with React, Express, MongoDB and Socket.io",
+  "description": "Professional real-time chat application with MERN stack",
   "main": "index.js",
   "scripts": {
-    "start": "cd server && npm install && npm start",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && npm run dev",
-    "client": "cd client && npm run dev",
-    "install-all": "npm install && cd client && npm install --production=false && cd ../server && npm install",
-    "build": "npm install && cd client && npm install --production=false && npm run build && cd ../server && npm install",
-    "deploy": "npm run build && cd server && npm start",
-    "build-pwa": "cd client && npm install workbox-window workbox-webpack-plugin --production=false && npm run build"
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && npm install",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm start",
+    "start": "npm run start:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "npm run install:all && npm run build:frontend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && npm test",
+    "test": "npm run test:backend && npm run test:frontend"
   },
   "keywords": [
     "chat",
@@ -19,7 +25,8 @@
     "express",
     "mongodb",
     "socket.io",
-    "real-time"
+    "real-time",
+    "mern"
   ],
   "author": "",
   "license": "ISC",
@@ -28,8 +35,5 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "dependencies": {
-    "workbox-window": "^7.3.0"
   }
 }

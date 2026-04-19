@@ -5,8 +5,8 @@ services:
     env: node
     region: ohio
     plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && npm start
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -19,13 +19,13 @@ services:
         value: 5002
     autoDeploy: true
 
-  # Frontend service (only needed if you deploy separately, otherwise the backend serves the frontend)
+  # Frontend service (static site)
   - type: web
     name: chat-app-frontend
     env: static
     region: ohio
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: client/dist
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
     pullRequestPreviewsEnabled: true
     routes:
       - type: rewrite
@@ -38,4 +38,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-    autoDeploy: true 
+      - key: VITE_API_URL
+        value: https://chat-app-backend.onrender.com
+    autoDeploy: true
