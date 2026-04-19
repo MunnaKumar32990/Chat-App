@@ -20,87 +20,80 @@ Updated build scripts to ensure proper installation before building.
 
 ## Deployment Steps
 
-### Option 1: Deploy via render.yaml (Recommended)
+### IMPORTANT: Use Manual Deployment (Not Blueprint)
 
-1. **Push your code to GitHub**
-   ```bash
-   git add .
-   git commit -m "Update deployment configuration"
-   git push origin main
-   ```
+Due to the monorepo structure, you need to deploy each service manually rather than using the Blueprint feature.
 
-2. **Create New Blueprint on Render**
-   - Go to https://dashboard.render.com
-   - Click "New +" → "Blueprint"
-   - Connect your GitHub repository
-   - Select the repository containing your chat app
-   - Render will automatically detect `render.yaml`
-   - Click "Apply"
-
-3. **Set Environment Variables**
-   After deployment starts, you'll need to set these in the Render dashboard:
-   
-   **For Backend Service:**
-   - `MONGODB_URI`: Your MongoDB connection string
-   - `JWT_SECRET`: Your JWT secret key
-   - `NODE_ENV`: production (already set)
-   - `PORT`: 5002 (already set)
-   
-   **For Frontend Service:**
-   - `VITE_API_URL`: Your backend URL (e.g., https://chat-app-backend.onrender.com)
-   - `NODE_ENV`: production (already set)
-
-### Option 2: Manual Deployment
-
-If the Blueprint approach doesn't work, deploy each service manually:
-
-#### Backend Service
+### Step 1: Deploy Backend Service
 
 1. **Create New Web Service**
-   - Go to Render Dashboard
+   - Go to https://dashboard.render.com
    - Click "New +" → "Web Service"
-   - Connect your repository
-   - Configure:
-     - **Name**: chat-app-backend
-     - **Root Directory**: `backend`
-     - **Environment**: Node
-     - **Region**: Ohio (or your preferred region)
-     - **Branch**: main
-     - **Build Command**: `npm install`
-     - **Start Command**: `npm start`
-     - **Plan**: Free
+   - Connect your GitHub repository
+   - Select your repository
+   
+2. **Configure Backend Service**
+   - **Name**: `chat-app-backend`
+   - **Root Directory**: `backend`
+   - **Environment**: `Node`
+   - **Region**: Ohio (or your preferred region)
+   - **Branch**: `main`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Plan**: Free
 
-2. **Add Environment Variables**
-   - `NODE_ENV`: production
-   - `PORT`: 5002
-   - `MONGODB_URI`: [Your MongoDB URI]
-   - `JWT_SECRET`: [Your JWT Secret]
+3. **Add Environment Variables**
+   Click "Advanced" and add:
+   - `NODE_ENV` = `production`
+   - `PORT` = `5002`
+   - `MONGODB_URI` = `[Your MongoDB Atlas URI]`
+   - `JWT_SECRET` = `[Your JWT Secret - generate a random string]`
 
-3. **Add Health Check**
-   - Path: `/api/health`
+4. **Add Health Check Path**
+   - Scroll down to "Health Check Path"
+   - Enter: `/api/health`
 
-#### Frontend Service
+5. **Click "Create Web Service"**
+   - Wait for deployment to complete (5-10 minutes)
+   - Copy the backend URL (e.g., `https://chat-app-backend.onrender.com`)
+
+### Step 2: Deploy Frontend Service
 
 1. **Create New Static Site**
    - Go to Render Dashboard
    - Click "New +" → "Static Site"
-   - Connect your repository
-   - Configure:
-     - **Name**: chat-app-frontend
-     - **Root Directory**: `frontend`
-     - **Branch**: main
-     - **Build Command**: `npm install && npm run build`
-     - **Publish Directory**: `dist`
+   - Connect the same GitHub repository
+   
+2. **Configure Frontend Service**
+   - **Name**: `chat-app-frontend`
+   - **Root Directory**: `frontend`
+   - **Branch**: `main`
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
 
-2. **Add Environment Variables**
-   - `NODE_ENV`: production
-   - `VITE_API_URL`: [Your backend URL from step 1]
+3. **Add Environment Variables**
+   Click "Advanced" and add:
+   - `NODE_ENV` = `production`
+   - `VITE_API_URL` = `[Your backend URL from Step 1]`
+     Example: `https://chat-app-backend.onrender.com`
 
-3. **Configure Redirects/Rewrites**
-   Add this to handle client-side routing:
-   - Source: `/*`
-   - Destination: `/index.html`
-   - Action: Rewrite
+4. **Configure Redirects/Rewrites**
+   - Scroll down to "Redirects/Rewrites"
+   - Click "Add Rule"
+   - **Source**: `/*`
+   - **Destination**: `/index.html`
+   - **Action**: `Rewrite`
+
+5. **Click "Create Static Site"**
+   - Wait for deployment to complete (5-10 minutes)
+   - Your frontend will be available at the provided URL
+
+### Step 3: Verify Deployment
+
+1. Visit your frontend URL
+2. Try to register a new account
+3. Login and test messaging
+4. Check that real-time features work
 
 ## Troubleshooting
 
